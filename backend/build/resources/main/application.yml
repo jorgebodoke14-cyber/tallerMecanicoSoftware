@@ -1,0 +1,30 @@
+server:
+  port: ${SERVER_PORT:8082}
+
+spring:
+  application:
+    name: taller-recepcion-backend
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:springdb}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USER:spring}
+    password: ${DB_PASSWORD:nerv_spring_2026}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:change-this-secret-with-at-least-64-characters-for-local-development-only}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:480}
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+  seed:
+    owner-name: ${DEFAULT_OWNER_NAME:Dueno del Taller}
+    owner-email: ${DEFAULT_OWNER_EMAIL:dueno@taller.com}
+    owner-password: ${DEFAULT_OWNER_PASSWORD:Nerv_owner_2026!}
