@@ -9,21 +9,21 @@
       "url": "https://github.com/jorgebodoke14-cyber/tallerMecanicoSoftware.git",
       "provider": "github",
       "link_mode": "local-only",
-      "revision": "a678ebdfbddd6366a494aaaca882ea030c01ddc8"
+      "revision": "013aad57e8db6ce4a6306de80999e08747873845"
     }
   },
   "components": [
     { "id": "authorized-user", "type": "external", "label": "Personal autorizado", "sublabel": "Administrador o Recepcionista", "pos": [40, 290], "size": [150, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/clients/ClientFacade.java", "line": 32, "end_line": 35, "label": "Roles permitidos" }] },
     { "id": "vue-form", "type": "frontend", "label": "Vista Vue", "sublabel": "ClientRegistration.vue", "tag": "Formulario + preview", "pos": [275, 290], "size": [160, 64], "sources": [{ "path": "frontend/src/components/ClientRegistration.vue", "line": 1, "end_line": 31, "label": "Formulario" }] },
     { "id": "client-facade-ui", "type": "frontend", "label": "ClienteFacade", "sublabel": "Valida contexto y foto", "pos": [515, 290], "size": [160, 64], "sources": [{ "path": "frontend/src/facades/ClientFacade.js", "line": 7, "end_line": 34, "label": "Fachada Vue" }] },
-    { "id": "client-repository-ui", "type": "frontend", "label": "ClienteRepository", "sublabel": "REST multipart", "pos": [755, 290], "size": [150, 64], "sources": [{ "path": "frontend/src/repositories/ClientRepository.js", "line": 1, "end_line": 9, "label": "Repositorio REST" }] },
+    { "id": "client-repository-ui", "type": "frontend", "label": "ClienteRepository", "sublabel": "REST multipart", "pos": [755, 290], "size": [150, 64], "sources": [{ "path": "frontend/src/repositories/ClientRepository.js", "line": 1, "end_line": 8, "label": "Repositorio REST" }] },
     { "id": "client-controller", "type": "backend", "label": "ClientController", "sublabel": "POST /api/clients", "pos": [990, 290], "size": [150, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/clients/ClientController.java", "line": 15, "end_line": 27, "label": "Entrada REST" }] },
-    { "id": "client-facade-api", "type": "backend", "label": "ClientFacade", "sublabel": "Permisos, sucursal y duplicados", "tag": "Aplicacion", "pos": [1215, 290], "size": [180, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/clients/ClientFacade.java", "line": 26, "end_line": 52, "label": "Fachada backend" }] },
-    { "id": "auth-service", "type": "security", "label": "JWT y usuarios", "sublabel": "Sesion activa + rol + branch_id", "pos": [1215, 130], "size": [180, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/security/JwtService.java", "line": 25, "end_line": 36, "label": "JWT con sucursal" }, { "path": "backend/src/main/java/com/taller/recepcion/users/UserAccount.java", "line": 38, "end_line": 40, "label": "Usuario-sucursal" }] },
-    { "id": "photo-storage", "type": "backend", "label": "PhotoStorage", "sublabel": "Adaptador LocalPhotoStorage", "pos": [1215, 460], "size": [180, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/photos/PhotoStorage.java", "line": 6, "end_line": 12, "label": "Puerto de almacenamiento" }, { "path": "backend/src/main/java/com/taller/recepcion/photos/LocalPhotoStorage.java", "line": 13, "end_line": 31, "label": "Adaptador local" }] },
-    { "id": "branch-service", "type": "backend", "label": "Sucursal", "sublabel": "Branch y branch_id", "pos": [1455, 130], "size": [150, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/branches/Branch.java", "line": 10, "end_line": 28, "label": "Entidad sucursal" }] },
-    { "id": "client-repository-api", "type": "backend", "label": "ClientRepository", "sublabel": "JPA + unicidad por sucursal", "pos": [1455, 290], "size": [170, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/clients/ClientRepository.java", "line": 6, "end_line": 12, "label": "Repositorio JPA" }] },
-    { "id": "mysql", "type": "database", "label": "MySQL", "sublabel": "clients, branches, users, audit_logs", "pos": [1695, 290], "size": [180, 64], "sources": [{ "path": "backend/src/main/resources/application.yml", "line": 6, "end_line": 22, "label": "Datasource y multipart" }] }
+    { "id": "client-facade-api", "type": "backend", "label": "ClientFacade", "sublabel": "Permisos, sucursal y duplicados", "tag": "Aplicacion", "pos": [1190, 290], "size": [180, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/clients/ClientFacade.java", "line": 26, "end_line": 52, "label": "Fachada backend" }] },
+    { "id": "auth-service", "type": "security", "label": "JWT y usuarios", "sublabel": "Sesion activa + rol + branch_id", "pos": [1190, 130], "size": [180, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/security/JwtService.java", "line": 25, "end_line": 36, "label": "JWT con sucursal" }, { "path": "backend/src/main/java/com/taller/recepcion/users/UserAccount.java", "line": 38, "end_line": 40, "label": "Usuario-sucursal" }] },
+    { "id": "photo-storage", "type": "backend", "label": "PhotoStorage", "sublabel": "Adaptador LocalPhotoStorage", "pos": [990, 460], "size": [180, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/photos/PhotoStorage.java", "line": 6, "end_line": 10, "label": "Puerto de almacenamiento" }, { "path": "backend/src/main/java/com/taller/recepcion/photos/LocalPhotoStorage.java", "line": 13, "end_line": 29, "label": "Adaptador local" }] },
+    { "id": "branch-service", "type": "backend", "label": "Sucursal", "sublabel": "Branch y branch_id", "pos": [1190, 460], "size": [150, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/branches/Branch.java", "line": 10, "end_line": 24, "label": "Entidad sucursal" }] },
+    { "id": "client-repository-api", "type": "backend", "label": "ClientRepository", "sublabel": "JPA + unicidad por sucursal", "pos": [1445, 290], "size": [170, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/clients/ClientRepository.java", "line": 6, "end_line": 11, "label": "Repositorio JPA" }] },
+    { "id": "mysql", "type": "database", "label": "MySQL", "sublabel": "clients, branches, users, audit_logs", "pos": [1445, 460], "size": [180, 64], "sources": [{ "path": "backend/src/main/resources/application.yml", "line": 6, "end_line": 22, "label": "Datasource y multipart" }] }
   ],
   "boundaries": [
     { "kind": "security-group", "label": "Navegador autenticado", "wraps": ["vue-form", "client-facade-ui", "client-repository-ui"], "pad": 36 },
@@ -34,11 +34,11 @@
     { "from": "vue-form", "to": "client-facade-ui", "label": "contexto + foto", "variant": "emphasis" },
     { "from": "client-facade-ui", "to": "client-repository-ui", "label": "datos validados" },
     { "from": "client-repository-ui", "to": "client-controller", "label": "HTTPS multipart" },
-    { "from": "client-controller", "to": "client-facade-api", "label": "solicitud autenticada", "variant": "emphasis" },
+    { "from": "client-controller", "to": "client-facade-api", "label": "JWT", "variant": "emphasis" },
     { "from": "client-facade-api", "to": "auth-service", "label": "valida rol y sesion", "variant": "security" },
     { "from": "auth-service", "to": "branch-service", "label": "resuelve branch_id", "variant": "security" },
     { "from": "client-facade-api", "to": "photo-storage", "label": "valida MIME y almacena" },
-    { "from": "client-facade-api", "to": "client-repository-api", "label": "sin duplicados", "variant": "emphasis" },
+    { "from": "client-facade-api", "to": "client-repository-api", "label": "unicidad", "variant": "emphasis" },
     { "from": "branch-service", "to": "mysql", "label": "sucursales" },
     { "from": "client-repository-api", "to": "mysql", "label": "JPA / SQL", "variant": "emphasis" }
   ],
