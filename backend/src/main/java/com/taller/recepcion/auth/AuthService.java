@@ -16,6 +16,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.taller.recepcion.branches.BranchRepository;
+import com.taller.recepcion.branches.Branch;
 
 @Service
 public class AuthService {
@@ -23,16 +25,19 @@ public class AuthService {
   private final PasswordResetTokenRepository resetTokens;
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
+  private final BranchRepository branches;
 
   public AuthService(
       UserAccountRepository users,
       PasswordResetTokenRepository resetTokens,
       PasswordEncoder passwordEncoder,
-      JwtService jwtService) {
+      JwtService jwtService,
+      BranchRepository branches) {
     this.users = users;
     this.resetTokens = resetTokens;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
+    this.branches = branches;
   }
 
   @Transactional
@@ -46,6 +51,8 @@ public class AuthService {
     user.setEmail(request.email().toLowerCase());
     user.setPasswordHash(passwordEncoder.encode(request.password()));
     user.setRole(request.role());
+    Branch branch = branches.findByCode("MAIN").orElseThrow(() -> new IllegalStateException("Sucursal principal no configurada"));
+    user.setBranch(branch);
     user.setActive(true);
     users.save(user);
 

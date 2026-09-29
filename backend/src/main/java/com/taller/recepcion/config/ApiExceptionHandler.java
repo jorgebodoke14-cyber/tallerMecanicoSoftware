@@ -7,6 +7,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.security.access.AccessDeniedException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -27,5 +28,10 @@ public class ApiExceptionHandler {
         .map(error -> error.getField() + ": " + error.getDefaultMessage())
         .orElse("Solicitud invalida");
     return ResponseEntity.badRequest().body(Map.of("message", message));
+  }
+
+  @ExceptionHandler(AccessDeniedException.class)
+  ResponseEntity<Map<String, String>> accessDenied(AccessDeniedException exception) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", exception.getMessage()));
   }
 }

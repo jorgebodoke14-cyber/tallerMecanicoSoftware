@@ -1,7 +1,7 @@
 <template>
   <main class="grid min-h-screen bg-[radial-gradient(circle_at_top_left,#dff6f1_0,#f4f7fb_34%,#e9eef5_100%)] px-4 py-6 sm:px-6 lg:px-8">
     <section class="mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[1fr_430px]">
-      <div class="hidden lg:block">
+      <div v-if="!user" class="hidden lg:block">
         <div class="max-w-xl">
           <div class="mb-8 inline-flex items-center gap-3 rounded-md border border-white/70 bg-white/80 px-4 py-3 shadow-sm backdrop-blur">
             <span class="grid h-10 w-10 place-items-center rounded-md bg-workshop-blue text-white">
@@ -27,7 +27,8 @@
         </div>
       </div>
 
-      <AuthPanel :mode="view" :session-user="user" @mode="view = $event" @authenticated="handleAuthenticated" @logout="logout" />
+      <AuthPanel v-if="!user" :mode="view" :session-user="user" @mode="view = $event" @authenticated="handleAuthenticated" @logout="logout" />
+      <ClientRegistration v-else :session-user="user" @logout="logout" />
     </section>
   </main>
 </template>
@@ -36,6 +37,7 @@
 import { ref } from 'vue'
 import { ClipboardCheck, LockKeyhole, ShieldCheck, Wrench } from 'lucide-vue-next'
 import AuthPanel from './components/AuthPanel.vue'
+import ClientRegistration from './components/ClientRegistration.vue'
 
 const view = ref('login')
 const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
@@ -50,7 +52,7 @@ function handleAuthenticated(session) {
   localStorage.setItem('token', session.token)
   localStorage.setItem('user', JSON.stringify(session.user))
   user.value = session.user
-  view.value = 'dashboard'
+  view.value = 'login'
 }
 
 function logout() {

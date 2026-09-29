@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Registro de Clientes - Diagrama de Componentes",
+    "output": "docs/diagrams/component-diagram.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/jorgebodoke14-cyber/tallerMecanicoSoftware.git",
+      "provider": "github",
+      "link_mode": "local-only",
+      "revision": "a678ebdfbddd6366a494aaaca882ea030c01ddc8"
+    }
+  },
+  "components": [
+    { "id": "authorized-user", "type": "external", "label": "Personal autorizado", "sublabel": "Administrador o Recepcionista", "pos": [40, 290], "size": [150, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/clients/ClientFacade.java", "line": 32, "end_line": 35, "label": "Roles permitidos" }] },
+    { "id": "vue-form", "type": "frontend", "label": "Vista Vue", "sublabel": "ClientRegistration.vue", "tag": "Formulario + preview", "pos": [275, 290], "size": [160, 64], "sources": [{ "path": "frontend/src/components/ClientRegistration.vue", "line": 1, "end_line": 31, "label": "Formulario" }] },
+    { "id": "client-facade-ui", "type": "frontend", "label": "ClienteFacade", "sublabel": "Valida contexto y foto", "pos": [515, 290], "size": [160, 64], "sources": [{ "path": "frontend/src/facades/ClientFacade.js", "line": 7, "end_line": 34, "label": "Fachada Vue" }] },
+    { "id": "client-repository-ui", "type": "frontend", "label": "ClienteRepository", "sublabel": "REST multipart", "pos": [755, 290], "size": [150, 64], "sources": [{ "path": "frontend/src/repositories/ClientRepository.js", "line": 1, "end_line": 9, "label": "Repositorio REST" }] },
+    { "id": "client-controller", "type": "backend", "label": "ClientController", "sublabel": "POST /api/clients", "pos": [990, 290], "size": [150, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/clients/ClientController.java", "line": 15, "end_line": 27, "label": "Entrada REST" }] },
+    { "id": "client-facade-api", "type": "backend", "label": "ClientFacade", "sublabel": "Permisos, sucursal y duplicados", "tag": "Aplicacion", "pos": [1215, 290], "size": [180, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/clients/ClientFacade.java", "line": 26, "end_line": 52, "label": "Fachada backend" }] },
+    { "id": "auth-service", "type": "security", "label": "JWT y usuarios", "sublabel": "Sesion activa + rol + branch_id", "pos": [1215, 130], "size": [180, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/security/JwtService.java", "line": 25, "end_line": 36, "label": "JWT con sucursal" }, { "path": "backend/src/main/java/com/taller/recepcion/users/UserAccount.java", "line": 38, "end_line": 40, "label": "Usuario-sucursal" }] },
+    { "id": "photo-storage", "type": "backend", "label": "PhotoStorage", "sublabel": "Adaptador LocalPhotoStorage", "pos": [1215, 460], "size": [180, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/photos/PhotoStorage.java", "line": 6, "end_line": 12, "label": "Puerto de almacenamiento" }, { "path": "backend/src/main/java/com/taller/recepcion/photos/LocalPhotoStorage.java", "line": 13, "end_line": 31, "label": "Adaptador local" }] },
+    { "id": "branch-service", "type": "backend", "label": "Sucursal", "sublabel": "Branch y branch_id", "pos": [1455, 130], "size": [150, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/branches/Branch.java", "line": 10, "end_line": 28, "label": "Entidad sucursal" }] },
+    { "id": "client-repository-api", "type": "backend", "label": "ClientRepository", "sublabel": "JPA + unicidad por sucursal", "pos": [1455, 290], "size": [170, 64], "sources": [{ "path": "backend/src/main/java/com/taller/recepcion/clients/ClientRepository.java", "line": 6, "end_line": 12, "label": "Repositorio JPA" }] },
+    { "id": "mysql", "type": "database", "label": "MySQL", "sublabel": "clients, branches, users, audit_logs", "pos": [1695, 290], "size": [180, 64], "sources": [{ "path": "backend/src/main/resources/application.yml", "line": 6, "end_line": 22, "label": "Datasource y multipart" }] }
+  ],
+  "boundaries": [
+    { "kind": "security-group", "label": "Navegador autenticado", "wraps": ["vue-form", "client-facade-ui", "client-repository-ui"], "pad": 36 },
+    { "kind": "security-group", "label": "API Spring Boot protegida", "wraps": ["client-controller", "client-facade-api", "auth-service", "photo-storage", "branch-service", "client-repository-api"], "pad": 36 }
+  ],
+  "connections": [
+    { "from": "authorized-user", "to": "vue-form", "label": "captura datos", "variant": "emphasis" },
+    { "from": "vue-form", "to": "client-facade-ui", "label": "contexto + foto", "variant": "emphasis" },
+    { "from": "client-facade-ui", "to": "client-repository-ui", "label": "datos validados" },
+    { "from": "client-repository-ui", "to": "client-controller", "label": "HTTPS multipart" },
+    { "from": "client-controller", "to": "client-facade-api", "label": "solicitud autenticada", "variant": "emphasis" },
+    { "from": "client-facade-api", "to": "auth-service", "label": "valida rol y sesion", "variant": "security" },
+    { "from": "auth-service", "to": "branch-service", "label": "resuelve branch_id", "variant": "security" },
+    { "from": "client-facade-api", "to": "photo-storage", "label": "valida MIME y almacena" },
+    { "from": "client-facade-api", "to": "client-repository-api", "label": "sin duplicados", "variant": "emphasis" },
+    { "from": "branch-service", "to": "mysql", "label": "sucursales" },
+    { "from": "client-repository-api", "to": "mysql", "label": "JPA / SQL", "variant": "emphasis" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Control de acceso", "items": ["Solo ADMINISTRATOR o RECEPTIONIST registra clientes", "La sucursal se obtiene del usuario autenticado"] },
+    { "dot": "cyan", "title": "Fotografia", "items": ["Maximo 15 MB", "JPG/JPEG, PNG y WEBP: extension, MIME y firma binaria"] },
+    { "dot": "rose", "title": "Persistencia", "items": ["Email y telefono personal son unicos por sucursal", "PhotoStorage permite cambiar Local por S3 o Cloudinary"] }
+  ]
+}

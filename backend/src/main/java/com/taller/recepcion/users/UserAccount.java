@@ -10,6 +10,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import com.taller.recepcion.branches.Branch;
 import java.time.Instant;
 
 @Entity
@@ -31,6 +34,10 @@ public class UserAccount {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Role role;
+
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "branch_id", nullable = false)
+  private Branch branch;
 
   @Column(nullable = false)
   private boolean active = true;
@@ -96,4 +103,8 @@ public class UserAccount {
   public void setActive(boolean active) {
     this.active = active;
   }
+
+  public Branch getBranch() { return branch; }
+
+  public void setBranch(Branch branch) { this.branch = branch; }
 }

@@ -3,10 +3,10 @@ const API_BASE = '/api'
 export async function apiRequest(path, options = {}) {
   const token = localStorage.getItem('token')
   const headers = {
-    'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers
   }
+  if (!(options.body instanceof FormData)) headers['Content-Type'] = 'application/json'
 
   const response = await fetch(`${API_BASE}${path}`, {
     ...options,
