@@ -36,7 +36,8 @@ public class Client {
   public Integer getAge() { return age; } public void setAge(Integer v) { age=v; }
   public LocalDate getBirthDate() { return birthDate; } public void setBirthDate(LocalDate v) { birthDate=v; }
   public String getPersonalPhone() { return personalPhone; } public void setPersonalPhone(String v) { personalPhone=v; }
-  public void setWorkPhone(String v) { workPhone=v; } public String getEmail() { return email; } public void setEmail(String v) { email=v; } public void setWorkEmail(String v) { workEmail=v; }
+  public String getWorkPhone() { return workPhone; } public void setWorkPhone(String v) { workPhone=v; } public String getEmail() { return email; } public void setEmail(String v) { email=v; } public String getWorkEmail() { return workEmail; } public void setWorkEmail(String v) { workEmail=v; }
   public void setPhotoKey(String v) { photoKey=v; } public String getPhotoKey() { return photoKey; } public void setPhotoMimeType(String v) { photoMimeType=v; } public String getPhotoMimeType() { return photoMimeType; }
   public void setStreet(String v) { street=v; } public void setNeighborhood(String v) { neighborhood=v; } public void setMunicipality(String v) { municipality=v; } public void setState(String v) { state=v; } public void setPostalCode(String v) { postalCode=v; }
+  public Instant getCreatedAt() { return createdAt; }
 }

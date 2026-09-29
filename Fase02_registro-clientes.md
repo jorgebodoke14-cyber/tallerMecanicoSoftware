@@ -17,7 +17,7 @@ El login ya aportaba JWT stateless, BCrypt con costo 12, usuarios activos, recup
 - Se agregaron `ADMINISTRATOR` y `RECEPTIONIST` como roles operativos de autorizacion.
 - Se agrego `Branch` y `branch_id` a `UserAccount`; el JWT incluye ese identificador y el DTO de sesion lo entrega al frontend.
 - La cuenta semilla se migra a `ADMINISTRATOR` y a la sucursal `MAIN` al arrancar.
-- El alta de usuarios internos ya no es una operacion anonima: `/api/auth/register` requiere `ADMINISTRATOR`.
+- El alta de usuarios internos ya no es una operacion anonima: `/api/auth/register` requiere `ADMINISTRATOR` o `RECEPTIONIST`. Una recepcionista puede crear cuentas operativas, pero el backend impide que eleve privilegios creando una cuenta `ADMINISTRATOR`.
 - El registro de clientes exige, tanto en frontend como backend, `ADMINISTRATOR` o `RECEPTIONIST`; el backend es la fuente de verdad.
 
 Para la base existente se aplico una migracion de datos no destructiva: se creo la sucursal `MAIN`, se asociaron los usuarios previos a ella y se amplio el enum de roles conservando los valores antiguos.
@@ -70,6 +70,22 @@ Se corrigio la pantalla de registro de clientes para utilizar etiquetas HTML nat
 
 La prueba de integracion posterior confirmo: creacion de un usuario `RECEPTIONIST` por un administrador con respuesta `200`, inicio de sesion de ese usuario, alta de cliente con respuesta `201` y bloqueo del duplicado con respuesta `400`.
 
+## Actualizacion de control operativo
+
+Se agrego el boton **Ver clientes guardados** en el modulo de clientes. Abre una ventana modal que consulta `GET /api/clients` y presenta nombre, correo, telefono personal y fecha de registro. La consulta pasa por `ClientFacade` y `ClientRepository` del frontend; en el backend, `ClientFacade.list` valida de nuevo la sesion, el rol y la sucursal antes de recuperar solo los clientes asociados al `branch_id` del actor. No se entrega una lista global entre sucursales.
+
+El alta de empleados desde `Usuarios` persiste en la tabla `users` mediante `POST /api/auth/register`: la contrasena se almacena como hash BCrypt, la cuenta hereda la sucursal de quien la crea y queda disponible para iniciar sesion. Administrador y Recepcionista pueden abrir los modulos de Clientes y Usuarios. Los demas roles autenticados reciben una unica pantalla de aviso de interfaz proxima y el boton de cerrar sesion, sin acceso a esas operaciones. Esta regla existe tanto en la interfaz como en Spring Security y en las fachadas de negocio.
+
+El login incorpora un control accesible para mostrar u ocultar la contrasena mientras se captura. No revela hashes ni contrasenas almacenadas y el formulario inicia sin credenciales precargadas.
+
+### Verificacion de esta actualizacion
+
+- `./gradlew test --console=plain`: compilacion del backend correcta; aun no hay clases de prueba automatizadas en el proyecto.
+- `npm run build`: compilacion Vue/Vite correcta.
+- Prueba contra MySQL: alta de una Recepcionista por Administrador (`200`), alta de un Mecanico por Recepcionista (`200`) e inicio de sesion de la cuenta creada confirmado.
+- Prueba de autorizacion: la Recepcionista obtuvo `200` al consultar clientes de su sucursal; la cuenta Mecanico obtuvo `403` en la misma ruta.
+- Revision visual local: el login contiene el boton de mostrar contrasena y el modulo autorizado muestra la ventana **Clientes registrados**.
+
 ## Despliegue
 
 No se publico una URL externa en esta iteracion: el entorno no tiene una sesion o token autorizado para Vercel, Render, Railway, AWS u otro proveedor. No se debe declarar una URL publica sin que el frontend, la API y MySQL sean realmente accesibles y tengan secretos configurados.
@@ -84,7 +100,9 @@ Para obtener una URL publica, se requiere autorizar una cuenta del proveedor esc
 | --- | --- | --- |
 | Registro con vista Vue, fachada y repositorio REST | Formulario, previsualizacion, `FormData` y mensajes de error | Pruebas E2E automatizadas del navegador |
 | API Spring Boot y persistencia | `ClientController`, `ClientFacade`, entidades, repositorio y restricciones unicas | Migraciones versionadas con Flyway/Liquibase antes de produccion |
-| Roles, sesion y sucursal | JWT con `branchId`, roles autorizados y `branch_id` en usuarios/clientes | Administracion de multiples sucursales en interfaz, fuera del alcance actual |
+| Roles, sesion y sucursal | JWT con `branchId`, roles autorizados y `branch_id` en usuarios/clientes; Administrador y Recepcionista gestionan clientes y usuarios | Administracion de multiples sucursales en interfaz, fuera del alcance actual |
+| Consulta de clientes guardados | Modal con listado REST filtrado por sucursal y control de rol en frontend y backend | Busqueda, paginacion o edicion de clientes, no solicitadas |
+| Alta e inicio de sesion de empleados | Persistencia BCrypt en `users`, sucursal heredada y validacion de acceso de la nueva cuenta | Gestion de ciclo de vida de cuentas, fuera del alcance actual |
 | Fotografias desacopladas | Validacion doble, UUID y adaptador local `PhotoStorage` | Adaptador S3/Cloudinary para instancias multiples |
 | Auditoria de login | Refactor de roles, sucursal y alta interna protegida | Auditoria de negocio enriquecida con identificador de cliente, si se requiere |
 | Diagrama Archify | JSON y HTML interactivo validados con calidad `showcase` | Ninguno para el diagrama actual |

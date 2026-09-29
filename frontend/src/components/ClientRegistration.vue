@@ -5,6 +5,7 @@
         <p class="text-sm font-bold text-workshop-teal">Sucursal {{ sessionUser.branchId }}</p>
         <h1 class="text-3xl font-black text-workshop-ink">Registro de clientes</h1>
       </div>
+      <button class="btn-secondary" type="button" @click="openClientsDialog">Ver clientes guardados</button>
     </header>
     <div v-if="!canRegister" class="panel p-6 text-sm text-red-700">Solo Administrador del sistema o Recepcionista puede registrar clientes.</div>
     <form v-else class="panel grid gap-6 p-6 sm:p-8" @submit.prevent="submit">
@@ -36,6 +37,23 @@
       <p v-if="success" class="rounded-md bg-emerald-50 p-3 text-sm text-emerald-700">Cliente registrado: {{ success.fullName }}.</p>
       <button class="btn-primary justify-center" type="submit" :disabled="loading"><LoaderCircle v-if="loading" class="h-4 w-4 animate-spin" /><UserPlus v-else class="h-4 w-4" />{{ loading ? 'Registrando...' : 'Registrar cliente' }}</button>
     </form>
+    <dialog ref="clientsDialog" class="w-[min(94vw,900px)] rounded-lg border border-slate-200 bg-white p-0 text-workshop-ink shadow-xl backdrop:bg-slate-950/40">
+      <section class="p-5 sm:p-6">
+        <header class="flex items-center justify-between gap-4 border-b border-slate-200 pb-4">
+          <div><h2 class="text-xl font-black">Clientes registrados</h2><p class="mt-1 text-sm text-slate-500">Sucursal {{ sessionUser.branchId }}</p></div>
+          <button class="btn-secondary" type="button" @click="clientsDialog.close()">Cerrar</button>
+        </header>
+        <p v-if="clientsError" class="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{{ clientsError }}</p>
+        <p v-else-if="clientsLoading" class="mt-4 text-sm text-slate-500">Cargando clientes...</p>
+        <p v-else-if="!clients.length" class="mt-4 text-sm text-slate-500">Aun no hay clientes registrados en esta sucursal.</p>
+        <div v-else class="mt-4 max-h-[55vh] overflow-auto">
+          <table class="w-full min-w-[640px] text-left text-sm">
+            <thead class="sticky top-0 bg-slate-50 text-workshop-steel"><tr><th class="px-3 py-2">Cliente</th><th class="px-3 py-2">Email</th><th class="px-3 py-2">Telefono</th><th class="px-3 py-2">Registro</th></tr></thead>
+            <tbody><tr v-for="client in clients" :key="client.id" class="border-t border-slate-100"><td class="px-3 py-3 font-semibold">{{ client.fullName }}</td><td class="px-3 py-3">{{ client.email }}</td><td class="px-3 py-3">{{ client.personalPhone }}</td><td class="px-3 py-3">{{ formatDate(client.createdAt) }}</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </dialog>
   </section>
 </template>
 
@@ -47,9 +65,12 @@ import { ClientFacade } from '../facades/ClientFacade'
 const props = defineProps({ sessionUser: { type: Object, required: true } })
 const facade = new ClientFacade()
 const photo = ref(null), previewUrl = ref(''), error = ref(''), success = ref(null), loading = ref(false)
+const clientsDialog = ref(null), clients = ref([]), clientsError = ref(''), clientsLoading = ref(false)
 const today = new Date().toISOString().slice(0, 10)
 const canRegister = computed(() => ['ADMINISTRATOR', 'RECEPTIONIST'].includes(props.sessionUser.role))
 const form = reactive({ fullName:'', alternateContactName:'', age:null, birthDate:'', personalPhone:'', workPhone:'', email:'', workEmail:'', street:'', neighborhood:'', municipality:'', state:'', postalCode:'' })
 async function onPhoto(event) { error.value=''; const selected = event.target.files?.[0]; try { const url = await facade.validatePhoto(selected); if (previewUrl.value) URL.revokeObjectURL(previewUrl.value); photo.value=selected; previewUrl.value=url } catch (err) { photo.value=null; event.target.value=''; error.value=err.message } }
 async function submit() { error.value=''; success.value=null; loading.value=true; try { success.value = await facade.register(props.sessionUser, form, photo.value) } catch (err) { error.value = err.message || 'No fue posible registrar el cliente.' } finally { loading.value=false } }
+async function openClientsDialog() { clientsError.value=''; clientsLoading.value=true; clientsDialog.value.showModal(); try { clients.value = await facade.list(props.sessionUser) } catch (err) { clientsError.value = err.message || 'No fue posible consultar los clientes.' } finally { clientsLoading.value=false } }
+function formatDate(value) { return new Intl.DateTimeFormat('es-MX', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) }
 </script>

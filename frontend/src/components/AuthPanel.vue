@@ -33,9 +33,13 @@
         <label class="label">Correo</label>
         <input v-model.trim="loginForm.email" class="field mt-1" autocomplete="email" type="email" placeholder="dueno@taller.com" required />
       </div>
-      <div>
+      <div class="relative">
         <label class="label">Contrasena</label>
-        <input v-model="loginForm.password" class="field mt-1" autocomplete="current-password" type="password" placeholder="••••••••" required />
+        <input v-model="loginForm.password" class="field mt-1 pr-11" autocomplete="current-password" :type="showPassword ? 'text' : 'password'" placeholder="••••••••" required />
+        <button class="absolute bottom-0 right-0 grid h-10 w-10 place-items-center text-slate-500 hover:text-workshop-blue" type="button" :aria-label="showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'" :title="showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'" @click="showPassword = !showPassword">
+          <EyeOff v-if="showPassword" class="h-4 w-4" />
+          <Eye v-else class="h-4 w-4" />
+        </button>
       </div>
       <button class="btn-primary w-full" type="submit" :disabled="loading">
         <LoaderCircle v-if="loading" class="h-4 w-4 animate-spin" />
@@ -67,7 +71,7 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
-import { KeyRound, LoaderCircle, LogOut, ShieldCheck, Wrench } from 'lucide-vue-next'
+import { Eye, EyeOff, KeyRound, LoaderCircle, LogOut, ShieldCheck, Wrench } from 'lucide-vue-next'
 import { apiRequest } from '../services/api'
 
 const props = defineProps({
@@ -80,8 +84,9 @@ const message = ref('')
 const error = ref('')
 const loading = ref(false)
 const recoverEmail = ref('')
+const showPassword = ref(false)
 
-const loginForm = reactive({ email: 'dueno@taller.com', password: 'Nerv_owner_2026!' })
+const loginForm = reactive({ email: '', password: '' })
 
 function tabClass(tab) {
   return [
@@ -102,7 +107,9 @@ function roleLabel(role) {
     MANAGER: 'Gerente',
     SECRETARY: 'Secretaria',
     MECHANIC: 'Mecanico',
-    ACCOUNTANT: 'Contador'
+    ACCOUNTANT: 'Contador',
+    ADMINISTRATOR: 'Administrador del sistema',
+    RECEPTIONIST: 'Recepcionista'
   }[role] || role
 }
 

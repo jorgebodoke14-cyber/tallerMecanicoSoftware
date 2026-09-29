@@ -30,7 +30,7 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  @PreAuthorize("hasRole('ADMINISTRATOR')")
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR','RECEPTIONIST')")
   public AuthResponse register(Principal principal, @Valid @RequestBody RegisterRequest request) {
     return authService.register(principal.getName(), request);
   }

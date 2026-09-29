@@ -5,4 +5,8 @@ export class ClientRepository {
   create(payload) {
     return apiRequest('/clients', { method: 'POST', body: payload })
   }
+
+  list() {
+    return apiRequest('/clients')
+  }
 }

@@ -45,11 +45,14 @@ public class AuthService {
     UserAccount actor = users.findByEmailIgnoreCase(actorEmail)
         .filter(UserAccount::isActive)
         .orElseThrow(() -> new BadCredentialsException("Sesion invalida"));
-    if (actor.getRole() != Role.ADMINISTRATOR) {
-      throw new IllegalArgumentException("Solo el Administrador del sistema puede crear usuarios internos");
+    if (actor.getRole() != Role.ADMINISTRATOR && actor.getRole() != Role.RECEPTIONIST) {
+      throw new IllegalArgumentException("Solo Administrador del sistema o Recepcionista puede crear usuarios internos");
     }
     if (!ASSIGNABLE_ROLES.contains(request.role())) {
       throw new IllegalArgumentException("El rol seleccionado no puede asignarse desde este modulo");
+    }
+    if (actor.getRole() == Role.RECEPTIONIST && request.role() == Role.ADMINISTRATOR) {
+      throw new IllegalArgumentException("La Recepcionista no puede crear cuentas de Administrador del sistema");
     }
     if (users.existsByEmailIgnoreCase(request.email())) {
       throw new IllegalArgumentException("El correo ya esta registrado");

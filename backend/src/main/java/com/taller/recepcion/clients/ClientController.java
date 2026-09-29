@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/clients")
@@ -24,5 +25,10 @@ public class ClientController {
       @RequestParam String postalCode, @RequestParam MultipartFile photo) {
     ClientRegistrationRequest request = new ClientRegistrationRequest(fullName, alternateContactName, age, birthDate, personalPhone, workPhone, email, workEmail, street, neighborhood, municipality, state, postalCode, photo);
     return ResponseEntity.status(201).body(facade.register(principal.getName(), request));
+  }
+
+  @GetMapping
+  public List<ClientSummaryResponse> list(Principal principal) {
+    return facade.list(principal.getName());
   }
 }

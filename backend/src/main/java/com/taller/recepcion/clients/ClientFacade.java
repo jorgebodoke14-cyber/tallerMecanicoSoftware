@@ -9,6 +9,7 @@ import com.taller.recepcion.users.UserAccountRepository;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Locale;
+import java.util.List;
 import java.util.regex.Pattern;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -28,11 +29,7 @@ public class ClientFacade {
   }
   @Transactional
   public ClientResponse register(String actorEmail, ClientRegistrationRequest request) {
-    UserAccount actor = users.findByEmailIgnoreCase(actorEmail).filter(UserAccount::isActive)
-        .orElseThrow(() -> new AccessDeniedException("La sesion no esta activa"));
-    if (actor.getRole() != Role.ADMINISTRATOR && actor.getRole() != Role.RECEPTIONIST) {
-      throw new AccessDeniedException("Solo Administrador del sistema o Recepcionista puede registrar clientes");
-    }
+    UserAccount actor = authorizedActor(actorEmail);
     validate(request);
     String email = request.email().trim().toLowerCase(Locale.ROOT);
     String personalPhone = digits(request.personalPhone());
@@ -47,6 +44,21 @@ public class ClientFacade {
     client.setEmail(email); client.setWorkEmail(blankToNull(request.workEmail(), "Email de trabajo")); client.setPhotoKey(photo.storageKey()); client.setPhotoMimeType(photo.mimeType());
     client.setStreet(clean(request.street())); client.setNeighborhood(clean(request.neighborhood())); client.setMunicipality(clean(request.municipality())); client.setState(clean(request.state())); client.setPostalCode(request.postalCode());
     return ClientResponse.from(clients.save(client));
+  }
+  @Transactional(readOnly = true)
+  public List<ClientSummaryResponse> list(String actorEmail) {
+    UserAccount actor = authorizedActor(actorEmail);
+    return clients.findAllByBranchIdOrderByCreatedAtDesc(actor.getBranch().getId()).stream()
+        .map(ClientSummaryResponse::from)
+        .toList();
+  }
+  private UserAccount authorizedActor(String actorEmail) {
+    UserAccount actor = users.findByEmailIgnoreCase(actorEmail).filter(UserAccount::isActive)
+        .orElseThrow(() -> new AccessDeniedException("La sesion no esta activa"));
+    if (actor.getRole() != Role.ADMINISTRATOR && actor.getRole() != Role.RECEPTIONIST) {
+      throw new AccessDeniedException("Solo Administrador del sistema o Recepcionista puede gestionar clientes");
+    }
+    return actor;
   }
   private void validate(ClientRegistrationRequest r) {
     required(r.fullName(), "Nombre completo", 2, 120); required(r.alternateContactName(), "Contacto alternativo", 2, 120);

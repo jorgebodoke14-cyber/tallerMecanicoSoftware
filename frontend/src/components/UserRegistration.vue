@@ -1,7 +1,7 @@
 <template>
   <section class="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
-    <div v-if="!isAdministrator" class="panel p-6 text-sm text-red-700">
-      Solo el Administrador del sistema puede crear usuarios internos.
+    <div v-if="!canRegisterUsers" class="panel p-6 text-sm text-red-700">
+      Solo Administrador del sistema o Recepcionista puede crear usuarios internos.
     </div>
     <form v-else class="panel grid gap-5 p-6 sm:p-8" @submit.prevent="submit">
       <div>
@@ -17,7 +17,7 @@
       </label>
       <label class="label">Rol operativo
         <select v-model="form.role" class="field mt-1" required>
-          <option v-for="role in roles" :key="role.value" :value="role.value">{{ role.label }}</option>
+          <option v-for="role in assignableRoles" :key="role.value" :value="role.value">{{ role.label }}</option>
         </select>
       </label>
       <label class="label">Contrasena temporal
@@ -40,7 +40,7 @@ import { LoaderCircle, UserPlus } from 'lucide-vue-next'
 import { apiRequest } from '../services/api'
 
 const props = defineProps({ sessionUser: { type: Object, required: true } })
-const isAdministrator = computed(() => props.sessionUser.role === 'ADMINISTRATOR')
+const canRegisterUsers = computed(() => ['ADMINISTRATOR', 'RECEPTIONIST'].includes(props.sessionUser.role))
 const roles = [
   { value: 'ADMINISTRATOR', label: 'Administrador del sistema' },
   { value: 'RECEPTIONIST', label: 'Recepcionista' },
@@ -51,6 +51,9 @@ const roles = [
 ]
 const form = reactive({ name: '', email: '', password: '', role: 'RECEPTIONIST' })
 const error = ref(''), created = ref(null), loading = ref(false)
+const assignableRoles = computed(() => props.sessionUser.role === 'ADMINISTRATOR'
+  ? roles
+  : roles.filter((role) => role.value !== 'ADMINISTRATOR'))
 
 async function submit() {
   error.value = ''

@@ -29,30 +29,33 @@
 
       <AuthPanel :mode="view" :session-user="user" @mode="view = $event" @authenticated="handleAuthenticated" @logout="logout" />
     </section>
-    <section v-else class="mx-auto w-full max-w-6xl">
+    <section v-else-if="canManageOperations" class="mx-auto w-full max-w-6xl">
       <nav class="mx-4 mt-2 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3 sm:mx-6">
         <div class="flex gap-2">
           <button class="btn-secondary" :class="activeView === 'clients' ? 'border-workshop-blue text-workshop-blue' : ''" type="button" @click="activeView = 'clients'">Clientes</button>
-          <button v-if="user.role === 'ADMINISTRATOR'" class="btn-secondary" :class="activeView === 'users' ? 'border-workshop-blue text-workshop-blue' : ''" type="button" @click="activeView = 'users'">Usuarios</button>
+          <button class="btn-secondary" :class="activeView === 'users' ? 'border-workshop-blue text-workshop-blue' : ''" type="button" @click="activeView = 'users'">Usuarios</button>
         </div>
         <button class="btn-secondary" type="button" @click="logout">Cerrar sesion</button>
       </nav>
       <ClientRegistration v-if="activeView === 'clients'" :session-user="user" />
       <UserRegistration v-else :session-user="user" />
     </section>
+    <UpcomingWorkspace v-else :session-user="user" @logout="logout" />
   </main>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { ClipboardCheck, LockKeyhole, ShieldCheck, Wrench } from 'lucide-vue-next'
 import AuthPanel from './components/AuthPanel.vue'
 import ClientRegistration from './components/ClientRegistration.vue'
 import UserRegistration from './components/UserRegistration.vue'
+import UpcomingWorkspace from './components/UpcomingWorkspace.vue'
 
 const view = ref('login')
 const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
 const activeView = ref('clients')
+const canManageOperations = computed(() => ['ADMINISTRATOR', 'RECEPTIONIST'].includes(user.value?.role))
 
 const trustItems = [
   { label: 'JWT seguro', icon: LockKeyhole },

@@ -51,4 +51,9 @@ export class ClientFacade {
     data.append('photo', photo)
     return this.repository.create(data)
   }
+
+  list(user) {
+    this.validateContext(user)
+    return this.repository.list()
+  }
 }
