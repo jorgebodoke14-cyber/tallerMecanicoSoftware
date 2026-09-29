@@ -11,7 +11,7 @@ public class AuthDtos {
   public record LoginRequest(@Email @NotBlank String email, @NotBlank String password) {}
 
   public record RegisterRequest(
-      @NotBlank String name,
+      @NotBlank @Size(min = 2, max = 120) String name,
       @Email @NotBlank String email,
       @Size(min = 8, message = "La contrasena debe tener al menos 8 caracteres") String password,
       @NotNull Role role) {}

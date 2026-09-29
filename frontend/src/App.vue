@@ -1,7 +1,7 @@
 <template>
   <main class="grid min-h-screen bg-[radial-gradient(circle_at_top_left,#dff6f1_0,#f4f7fb_34%,#e9eef5_100%)] px-4 py-6 sm:px-6 lg:px-8">
-    <section class="mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[1fr_430px]">
-      <div v-if="!user" class="hidden lg:block">
+    <section v-if="!user" class="mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[1fr_430px]">
+      <div class="hidden lg:block">
         <div class="max-w-xl">
           <div class="mb-8 inline-flex items-center gap-3 rounded-md border border-white/70 bg-white/80 px-4 py-3 shadow-sm backdrop-blur">
             <span class="grid h-10 w-10 place-items-center rounded-md bg-workshop-blue text-white">
@@ -27,8 +27,18 @@
         </div>
       </div>
 
-      <AuthPanel v-if="!user" :mode="view" :session-user="user" @mode="view = $event" @authenticated="handleAuthenticated" @logout="logout" />
-      <ClientRegistration v-else :session-user="user" @logout="logout" />
+      <AuthPanel :mode="view" :session-user="user" @mode="view = $event" @authenticated="handleAuthenticated" @logout="logout" />
+    </section>
+    <section v-else class="mx-auto w-full max-w-6xl">
+      <nav class="mx-4 mt-2 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3 sm:mx-6">
+        <div class="flex gap-2">
+          <button class="btn-secondary" :class="activeView === 'clients' ? 'border-workshop-blue text-workshop-blue' : ''" type="button" @click="activeView = 'clients'">Clientes</button>
+          <button v-if="user.role === 'ADMINISTRATOR'" class="btn-secondary" :class="activeView === 'users' ? 'border-workshop-blue text-workshop-blue' : ''" type="button" @click="activeView = 'users'">Usuarios</button>
+        </div>
+        <button class="btn-secondary" type="button" @click="logout">Cerrar sesion</button>
+      </nav>
+      <ClientRegistration v-if="activeView === 'clients'" :session-user="user" />
+      <UserRegistration v-else :session-user="user" />
     </section>
   </main>
 </template>
@@ -38,9 +48,11 @@ import { ref } from 'vue'
 import { ClipboardCheck, LockKeyhole, ShieldCheck, Wrench } from 'lucide-vue-next'
 import AuthPanel from './components/AuthPanel.vue'
 import ClientRegistration from './components/ClientRegistration.vue'
+import UserRegistration from './components/UserRegistration.vue'
 
 const view = ref('login')
 const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
+const activeView = ref('clients')
 
 const trustItems = [
   { label: 'JWT seguro', icon: LockKeyhole },
@@ -52,6 +64,7 @@ function handleAuthenticated(session) {
   localStorage.setItem('token', session.token)
   localStorage.setItem('user', JSON.stringify(session.user))
   user.value = session.user
+  activeView.value = 'clients'
   view.value = 'login'
 }
 

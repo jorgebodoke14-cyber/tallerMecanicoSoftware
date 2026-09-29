@@ -64,6 +64,12 @@ Resultado: validacion `showcase` aprobada, 9 controles tecnicos aprobados, cero 
 - Prueba de integracion contra MySQL: alta de un cliente con PNG valido devolvio `201 Created`.
 - Segundo envio con el mismo email y telefono dentro de `MAIN`: rechazado con `400` y mensaje de duplicado.
 
+## Correccion posterior de flujos
+
+Se corrigio la pantalla de registro de clientes para utilizar etiquetas HTML nativas; los 13 campos obligatorios y opcionales ahora son visibles y editables en la interfaz. Tambien se movio el registro de usuarios al area autenticada: el administrador ve la opcion `Usuarios`, crea cuentas con rol operativo y estas heredan el `branch_id` de su sesion. La pantalla anonima conserva solo inicio de sesion y recuperacion de contrasena, evitando un intento de alta sin permisos.
+
+La prueba de integracion posterior confirmo: creacion de un usuario `RECEPTIONIST` por un administrador con respuesta `200`, inicio de sesion de ese usuario, alta de cliente con respuesta `201` y bloqueo del duplicado con respuesta `400`.
+
 ## Despliegue
 
 No se publico una URL externa en esta iteracion: el entorno no tiene una sesion o token autorizado para Vercel, Render, Railway, AWS u otro proveedor. No se debe declarar una URL publica sin que el frontend, la API y MySQL sean realmente accesibles y tengan secretos configurados.

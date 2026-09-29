@@ -16,8 +16,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.taller.recepcion.branches.BranchRepository;
-import com.taller.recepcion.branches.Branch;
+import com.taller.recepcion.users.Role;
+import java.util.Set;
 
 @Service
 public class AuthService {
@@ -25,34 +25,42 @@ public class AuthService {
   private final PasswordResetTokenRepository resetTokens;
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
-  private final BranchRepository branches;
+  private static final Set<Role> ASSIGNABLE_ROLES = Set.of(
+      Role.ADMINISTRATOR, Role.RECEPTIONIST, Role.MANAGER, Role.SECRETARY,
+      Role.MECHANIC, Role.ACCOUNTANT);
 
   public AuthService(
       UserAccountRepository users,
       PasswordResetTokenRepository resetTokens,
       PasswordEncoder passwordEncoder,
-      JwtService jwtService,
-      BranchRepository branches) {
+      JwtService jwtService) {
     this.users = users;
     this.resetTokens = resetTokens;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
-    this.branches = branches;
   }
 
   @Transactional
-  public AuthResponse register(RegisterRequest request) {
+  public AuthResponse register(String actorEmail, RegisterRequest request) {
+    UserAccount actor = users.findByEmailIgnoreCase(actorEmail)
+        .filter(UserAccount::isActive)
+        .orElseThrow(() -> new BadCredentialsException("Sesion invalida"));
+    if (actor.getRole() != Role.ADMINISTRATOR) {
+      throw new IllegalArgumentException("Solo el Administrador del sistema puede crear usuarios internos");
+    }
+    if (!ASSIGNABLE_ROLES.contains(request.role())) {
+      throw new IllegalArgumentException("El rol seleccionado no puede asignarse desde este modulo");
+    }
     if (users.existsByEmailIgnoreCase(request.email())) {
       throw new IllegalArgumentException("El correo ya esta registrado");
     }
 
     UserAccount user = new UserAccount();
     user.setName(request.name());
-    user.setEmail(request.email().toLowerCase());
+    user.setEmail(request.email().trim().toLowerCase());
     user.setPasswordHash(passwordEncoder.encode(request.password()));
     user.setRole(request.role());
-    Branch branch = branches.findByCode("MAIN").orElseThrow(() -> new IllegalStateException("Sucursal principal no configurada"));
-    user.setBranch(branch);
+    user.setBranch(actor.getBranch());
     user.setActive(true);
     users.save(user);
 

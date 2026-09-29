@@ -8,9 +8,8 @@
       <p class="text-sm text-slate-500">Acceso seguro del personal</p>
     </div>
 
-    <div class="mb-6 grid grid-cols-3 gap-2 rounded-lg bg-slate-100 p-1">
+    <div class="mb-6 grid grid-cols-2 gap-2 rounded-lg bg-slate-100 p-1">
       <button type="button" :class="tabClass('login')" @click="selectMode('login')">Login</button>
-      <button type="button" :class="tabClass('register')" @click="selectMode('register')">Registro</button>
       <button type="button" :class="tabClass('recover')" @click="selectMode('recover')">Recuperar</button>
     </div>
 
@@ -45,42 +44,6 @@
       </button>
     </form>
 
-    <form v-else-if="mode === 'register'" class="space-y-4" @submit.prevent="register">
-      <div>
-        <h2 class="text-2xl font-black">Registrar usuario</h2>
-        <p class="mt-1 text-sm text-slate-500">Crea usuarios internos con rol operativo.</p>
-      </div>
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label class="label">Nombre</label>
-          <input v-model.trim="registerForm.name" class="field mt-1" autocomplete="name" placeholder="Ana Lopez" required />
-        </div>
-        <div>
-          <label class="label">Rol</label>
-          <select v-model="registerForm.role" class="field mt-1">
-            <option value="OWNER">Dueno</option>
-            <option value="MANAGER">Gerente</option>
-            <option value="SECRETARY">Secretaria</option>
-            <option value="MECHANIC">Mecanico</option>
-            <option value="ACCOUNTANT">Contador</option>
-          </select>
-        </div>
-      </div>
-      <div>
-        <label class="label">Correo</label>
-        <input v-model.trim="registerForm.email" class="field mt-1" autocomplete="email" type="email" required />
-      </div>
-      <div>
-        <label class="label">Contrasena</label>
-        <input v-model="registerForm.password" class="field mt-1" autocomplete="new-password" type="password" required minlength="8" />
-      </div>
-      <button class="btn-primary w-full" type="submit" :disabled="loading">
-        <LoaderCircle v-if="loading" class="h-4 w-4 animate-spin" />
-        <UserPlus v-else class="h-4 w-4" />
-        {{ loading ? 'Creando...' : 'Crear usuario' }}
-      </button>
-    </form>
-
     <form v-else class="space-y-4" @submit.prevent="recover">
       <div>
         <h2 class="text-2xl font-black">Recuperar contrasena</h2>
@@ -104,7 +67,7 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
-import { KeyRound, LoaderCircle, LogOut, ShieldCheck, UserPlus, Wrench } from 'lucide-vue-next'
+import { KeyRound, LoaderCircle, LogOut, ShieldCheck, Wrench } from 'lucide-vue-next'
 import { apiRequest } from '../services/api'
 
 const props = defineProps({
@@ -119,7 +82,6 @@ const loading = ref(false)
 const recoverEmail = ref('')
 
 const loginForm = reactive({ email: 'dueno@taller.com', password: 'Nerv_owner_2026!' })
-const registerForm = reactive({ name: '', email: '', password: '', role: 'SECRETARY' })
 
 function tabClass(tab) {
   return [
@@ -156,24 +118,6 @@ async function login() {
     emit('authenticated', session)
   } catch (err) {
     error.value = err.message || 'No se pudo iniciar sesion.'
-  } finally {
-    loading.value = false
-  }
-}
-
-async function register() {
-  error.value = ''
-  message.value = ''
-  loading.value = true
-  try {
-    await apiRequest('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(registerForm)
-    })
-    message.value = 'Usuario registrado. Ya puede iniciar sesion.'
-    emit('mode', 'login')
-  } catch (err) {
-    error.value = err.message || 'No se pudo registrar el usuario.'
   } finally {
     loading.value = false
   }

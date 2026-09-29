@@ -24,8 +24,27 @@ export class ClientFacade {
   validateContext(user) {
     if (!user || !['ADMINISTRATOR', 'RECEPTIONIST'].includes(user.role) || !user.branchId) throw new Error('Tu sesion no tiene permisos para registrar clientes.')
   }
+  validateForm(form) {
+    const required = ['fullName', 'alternateContactName', 'street', 'neighborhood', 'municipality', 'state']
+    for (const field of required) {
+      if (!form[field]?.trim() || form[field].trim().length < 2) throw new Error('Completa todos los datos obligatorios del cliente y su direccion.')
+    }
+    const phone = (value) => String(value || '').replace(/\D/g, '')
+    if (!/^\d{10}$/.test(phone(form.personalPhone))) throw new Error('El telefono personal debe tener exactamente 10 digitos.')
+    if (form.workPhone && !/^\d{10}$/.test(phone(form.workPhone))) throw new Error('El telefono de trabajo debe tener exactamente 10 digitos.')
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email || '')) throw new Error('Ingresa un email personal valido.')
+    if (form.workEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.workEmail)) throw new Error('Ingresa un email de trabajo valido.')
+    if (!/^\d{5}$/.test(form.postalCode || '')) throw new Error('El codigo postal debe tener 5 digitos.')
+    if (!Number.isInteger(form.age) || form.age < 18 || form.age > 120) throw new Error('La edad debe estar entre 18 y 120 anos.')
+    const birthDate = new Date(`${form.birthDate}T00:00:00`)
+    const today = new Date()
+    let age = today.getFullYear() - birthDate.getFullYear()
+    if (today < new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate())) age -= 1
+    if (Number.isNaN(birthDate.getTime()) || age !== form.age) throw new Error('La fecha de nacimiento no coincide con la edad.')
+  }
   async register(user, form, photo) {
     this.validateContext(user)
+    this.validateForm(form)
     await this.validatePhoto(photo)
     const data = new FormData()
     Object.entries(form).forEach(([key, value]) => data.append(key, value ?? ''))

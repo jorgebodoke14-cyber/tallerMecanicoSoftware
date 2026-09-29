@@ -31,8 +31,8 @@ public class AuthController {
 
   @PostMapping("/register")
   @PreAuthorize("hasRole('ADMINISTRATOR')")
-  public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
-    return authService.register(request);
+  public AuthResponse register(Principal principal, @Valid @RequestBody RegisterRequest request) {
+    return authService.register(principal.getName(), request);
   }
 
   @PostMapping("/login")
