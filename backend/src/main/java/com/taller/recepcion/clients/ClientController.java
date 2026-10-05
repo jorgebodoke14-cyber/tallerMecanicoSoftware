@@ -22,8 +22,9 @@ public class ClientController {
       @RequestParam LocalDate birthDate, @RequestParam String personalPhone, @RequestParam(required = false) String workPhone,
       @RequestParam String email, @RequestParam(required = false) String workEmail, @RequestParam String street,
       @RequestParam String neighborhood, @RequestParam String municipality, @RequestParam String state,
-      @RequestParam String postalCode, @RequestParam MultipartFile photo) {
-    ClientRegistrationRequest request = new ClientRegistrationRequest(fullName, alternateContactName, age, birthDate, personalPhone, workPhone, email, workEmail, street, neighborhood, municipality, state, postalCode, photo);
+      @RequestParam String postalCode, @RequestParam String stateCode, @RequestParam String municipalityCode,
+      @RequestParam String settlementId, @RequestParam MultipartFile photo) {
+    ClientRegistrationRequest request = new ClientRegistrationRequest(fullName, alternateContactName, age, birthDate, personalPhone, workPhone, email, workEmail, street, neighborhood, municipality, state, postalCode, stateCode, municipalityCode, settlementId, photo);
     return ResponseEntity.status(201).body(facade.register(principal.getName(), request));
   }
 

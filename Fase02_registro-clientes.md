@@ -94,6 +94,30 @@ La configuracion recomendada es frontend en Vercel y backend Docker/Spring Boot 
 
 Para obtener una URL publica, se requiere autorizar una cuenta del proveedor escogido y configurar esas variables como secretos. Las credenciales de desarrollo no se incluyen en este documento ni deben copiarse a un proveedor.
 
+## Actualizacion SEPOMEX - Catalogo postal local
+
+Se incorporo la base tecnica para que el registro de clientes seleccione una direccion autentica desde el catalogo nacional SEPOMEX, almacenado localmente en MySQL. La aplicacion no consulta servicios publicos durante el registro; asi se evita depender de disponibilidad, limites o cambios de terceros.
+
+| Estado | Elemento | Detalle |
+| --- | --- | --- |
+| ✅ | Modelo local | Se agregaron las tablas `postal_states`, `postal_municipalities` y `postal_settlements`, con llaves de texto para conservar codigos con ceros iniciales. |
+| ✅ | Importador transaccional | El importador lee el archivo oficial `CPdescarga.txt`, valida encabezados, acepta UTF-8 o Windows-1252, elimina duplicados y reemplaza el catalogo dentro de una transaccion. |
+| ✅ | API protegida | Se implementaron los endpoints JWT `GET /api/postal/states`, municipios por estado y asentamientos por municipio. |
+| ✅ | Registro coherente | El frontend usa selects dependientes y busqueda local de asentamientos; el backend vuelve a validar estado, municipio, asentamiento y codigo postal antes de guardar al cliente. |
+| ✅ | Pruebas | Se agregaron pruebas para el parser SEPOMEX y la fachada postal, incluyendo ceros iniciales, duplicados, catalogo vacio y manipulacion de codigo postal. |
+| ✅ | Documentacion | La guia operativa esta en [docs/sepomex-catalog.md](docs/sepomex-catalog.md). |
+| ⏳ | Carga del catalogo nacional oficial | Pendiente hasta disponer del archivo oficial descargado. No se deja una carga parcial ni datos ficticios en la base de datos. |
+| ⏳ | URL publica | Sigue pendiente una cuenta autorizada de proveedor y configuracion de secretos; no se declara una URL externa inexistente. |
+
+Para cargar el archivo oficial cuando este disponible, se debe ubicar en `backend/data/sepomex/CPdescarga.txt` (ruta ignorada por Git) y ejecutar:
+
+```bash
+cd backend
+./gradlew bootRun --args='--app.postal.import.enabled=true --app.postal.import-file=./data/sepomex/CPdescarga.txt'
+```
+
+Mientras el catalogo este vacio, el formulario informa claramente que SEPOMEX debe importarse antes de permitir un registro con direccion. Esta proteccion evita almacenar direcciones arbitrarias o inconsistentes.
+
 ## Estado de la iteracion
 
 | Lo que se hizo | Lo que esta completo | Lo que falta |

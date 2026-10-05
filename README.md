@@ -35,6 +35,10 @@ JWT_SECRET=change-this-secret-with-at-least-64-characters-for-production
 
 La API expone autenticacion, registro, recuperacion de contrasena, usuarios y ordenes de recepcion.
 
+## Catalogo postal SEPOMEX
+
+El registro de clientes usa un catalogo local MySQL de SEPOMEX para seleccionar Estado, Municipio, Colonia y Codigo Postal. El catalogo no se descarga ni se importa al iniciar la aplicacion. Consulta el procedimiento de carga y actualizacion en [docs/sepomex-catalog.md](docs/sepomex-catalog.md).
+
 Usuario inicial de desarrollo:
 
 - correo: `dueno@taller.com`

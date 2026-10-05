@@ -3,6 +3,8 @@ package com.taller.recepcion.clients;
 import com.taller.recepcion.photos.PhotoStorage;
 import com.taller.recepcion.photos.PhotoType;
 import com.taller.recepcion.photos.PhotoValidator;
+import com.taller.recepcion.postal.PostalCatalogFacade;
+import com.taller.recepcion.postal.PostalDtos.Address;
 import com.taller.recepcion.users.Role;
 import com.taller.recepcion.users.UserAccount;
 import com.taller.recepcion.users.UserAccountRepository;
@@ -24,13 +26,16 @@ public class ClientFacade {
   private final UserAccountRepository users;
   private final PhotoValidator photoValidator;
   private final PhotoStorage photoStorage;
-  public ClientFacade(ClientRepository clients, UserAccountRepository users, PhotoValidator photoValidator, PhotoStorage photoStorage) {
-    this.clients = clients; this.users = users; this.photoValidator = photoValidator; this.photoStorage = photoStorage;
+  private final PostalCatalogFacade postalCatalog;
+  public ClientFacade(ClientRepository clients, UserAccountRepository users, PhotoValidator photoValidator, PhotoStorage photoStorage,
+      PostalCatalogFacade postalCatalog) {
+    this.clients = clients; this.users = users; this.photoValidator = photoValidator; this.photoStorage = photoStorage; this.postalCatalog = postalCatalog;
   }
   @Transactional
   public ClientResponse register(String actorEmail, ClientRegistrationRequest request) {
     UserAccount actor = authorizedActor(actorEmail);
     validate(request);
+    Address address = postalCatalog.requireAddress(request.stateCode(), request.municipalityCode(), request.settlementId(), request.postalCode());
     String email = request.email().trim().toLowerCase(Locale.ROOT);
     String personalPhone = digits(request.personalPhone());
     Long branchId = actor.getBranch().getId();
@@ -42,7 +47,7 @@ public class ClientFacade {
     client.setBranch(actor.getBranch()); client.setFullName(clean(request.fullName())); client.setAlternateContactName(clean(request.alternateContactName()));
     client.setAge(request.age()); client.setBirthDate(request.birthDate()); client.setPersonalPhone(personalPhone); client.setWorkPhone(optionalPhone(request.workPhone()));
     client.setEmail(email); client.setWorkEmail(blankToNull(request.workEmail(), "Email de trabajo")); client.setPhotoKey(photo.storageKey()); client.setPhotoMimeType(photo.mimeType());
-    client.setStreet(clean(request.street())); client.setNeighborhood(clean(request.neighborhood())); client.setMunicipality(clean(request.municipality())); client.setState(clean(request.state())); client.setPostalCode(request.postalCode());
+    client.setStreet(clean(request.street())); client.setNeighborhood(address.settlement()); client.setMunicipality(address.municipality()); client.setState(address.state()); client.setPostalCode(address.postalCode());
     return ClientResponse.from(clients.save(client));
   }
   @Transactional(readOnly = true)
@@ -70,6 +75,7 @@ public class ClientFacade {
     if (r.workEmail() != null && !r.workEmail().isBlank() && !r.workEmail().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) throw new IllegalArgumentException("El email de trabajo no tiene un formato valido");
     required(r.street(), "Calle", 2, 150); required(r.neighborhood(), "Colonia", 2, 100); required(r.municipality(), "Municipio", 2, 100); required(r.state(), "Estado", 2, 100);
     if (r.postalCode() == null || !POSTAL_CODE.matcher(r.postalCode()).matches()) throw new IllegalArgumentException("El codigo postal debe tener 5 digitos");
+    required(r.stateCode(), "Clave de estado", 2, 2); required(r.municipalityCode(), "Clave de municipio", 1, 3); required(r.settlementId(), "Asentamiento", 3, 140);
   }
   private static void required(String value, String field, int min, int max) { if (value == null || value.trim().length() < min || value.trim().length() > max) throw new IllegalArgumentException(field + " debe tener entre " + min + " y " + max + " caracteres"); }
   private static String clean(String value) { return value.trim().replaceAll("\\s+", " "); }
